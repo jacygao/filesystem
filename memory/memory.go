@@ -7,6 +7,7 @@ package memory
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -14,8 +15,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"golang.org/x/net/context"
 )
 
 // A fake implementation of the S3 interface based on a simple key value map.
