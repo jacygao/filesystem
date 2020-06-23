@@ -8,7 +8,6 @@ package memory
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -41,9 +40,6 @@ func NewMemoryStore() *MemoryStore {
 
 // Get retrieves files from file storage
 func (ms *MemoryStore) Get(ctx context.Context, resourceKey string) (io.ReadCloser, error) {
-
-	var err error
-
 	ms.mutex.Lock()
 	defer ms.mutex.Unlock()
 
@@ -51,8 +47,7 @@ func (ms *MemoryStore) Get(ctx context.Context, resourceKey string) (io.ReadClos
 
 	items, exists := ms.assets[dir]
 	if !exists {
-		err = errors.New(fmt.Sprintf("Key %s does not exist", resourceKey))
-		return nil, err
+		return nil, fmt.Errorf("Key %s does not exist", resourceKey)
 	}
 
 	for _, item := range items {
@@ -61,22 +56,17 @@ func (ms *MemoryStore) Get(ctx context.Context, resourceKey string) (io.ReadClos
 		}
 	}
 
-	err = errors.New(fmt.Sprintf("Key %s does not exist", resourceKey))
-	return nil, err
+	return nil, fmt.Errorf("Key %s does not exist", resourceKey)
 }
 
 // ListFileNames returns a list of file names of files contained in file storage
 func (ms *MemoryStore) ListFileNames(ctx context.Context, path string) ([]string, error) {
-
-	var err error
-
 	ms.mutex.Lock()
 	defer ms.mutex.Unlock()
 
 	path = filepath.Join(ms.root, path)
 	if len(ms.assets[path]) < 1 {
-		err = errors.New(fmt.Sprintf("Key %s does not exist", path))
-		return nil, err
+		return nil, fmt.Errorf("Key %s does not exist", path)
 	}
 
 	var payload []string
@@ -127,8 +117,7 @@ func (ms *MemoryStore) Delete(ctx context.Context, resourceKey string) error {
 	dir, key := ms.getResources(resourceKey)
 
 	if len(ms.assets[dir]) < 1 {
-		err := errors.New(fmt.Sprintf("Key %s does not exist", resourceKey))
-		return err
+		return fmt.Errorf("Key %s does not exist", resourceKey)
 	}
 
 	for _, item := range ms.assets[dir] {
